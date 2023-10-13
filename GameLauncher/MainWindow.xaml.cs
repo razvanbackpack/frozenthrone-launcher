@@ -36,7 +36,7 @@ namespace GameLauncher
                 switch (_status)
                 {
                     case LauncherStatus.ready:
-                        PlayButton.Content = "Play";
+                        PlayButton.Content = "P L A Y";
                         break;
                     case LauncherStatus.failed:
                         PlayButton.Content = "Update Failed - Retry";
@@ -58,9 +58,9 @@ namespace GameLauncher
             InitializeComponent();
 
             rootPath = Directory.GetCurrentDirectory();
-            versionFile = Path.Combine(rootPath, "Version.txt");
+            versionFile = Path.Combine(rootPath, "FrozenThrone.wtf");
             gameZip = Path.Combine(rootPath, "Build.zip");
-            gameExe = Path.Combine(rootPath, "Build", "Pirate Game.exe");
+            gameExe = Path.Combine(rootPath, "", "wow.exe");
         }
 
         private void CheckForUpdates()
@@ -68,10 +68,13 @@ namespace GameLauncher
             if (File.Exists(versionFile))
             {
                 Version localVersion = new Version(File.ReadAllText(versionFile));
-                VersionText.Text = localVersion.ToString();
+                VersionText.Text = "Frozen Throne v" + localVersion.ToString();
 
                 try
                 {
+                    Status = LauncherStatus.ready;
+
+                    /* remove patch checking for now.
                     WebClient webClient = new WebClient();
                     Version onlineVersion = new Version(webClient.DownloadString("https://drive.google.com/uc?export=download&id=1R3GT_VINzmNoXKtvnvuJw6C86-k3Jr5s"));
 
@@ -83,6 +86,7 @@ namespace GameLauncher
                     {
                         Status = LauncherStatus.ready;
                     }
+                    */
                 }
                 catch (Exception ex)
                 {
@@ -98,6 +102,8 @@ namespace GameLauncher
 
         private void InstallGameFiles(bool _isUpdate, Version _onlineVersion)
         {
+            SkipDownload();
+            /*
             try
             {
                 WebClient webClient = new WebClient();
@@ -119,8 +125,17 @@ namespace GameLauncher
                 Status = LauncherStatus.failed;
                 MessageBox.Show($"Error installing game files: {ex}");
             }
+            */
         }
 
+        private void SkipDownload()
+        {
+            string onlineVersion = "1.0.0";
+            File.WriteAllText(versionFile, onlineVersion);
+
+            VersionText.Text = onlineVersion;
+            Status = LauncherStatus.ready;
+        }
         private void DownloadGameCompletedCallback(object sender, AsyncCompletedEventArgs e)
         {
             try
@@ -151,7 +166,7 @@ namespace GameLauncher
             if (File.Exists(gameExe) && Status == LauncherStatus.ready)
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo(gameExe);
-                startInfo.WorkingDirectory = Path.Combine(rootPath, "Build");
+                startInfo.WorkingDirectory = Path.Combine(rootPath, "");
                 Process.Start(startInfo);
 
                 Close();
@@ -161,11 +176,16 @@ namespace GameLauncher
                 CheckForUpdates();
             }
         }
+
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(-1);
+        }
     }
 
     struct Version
     {
-        internal static Version zero = new Version(0, 0, 0);
+        internal static Version zero = new Version(1, 0, 0);
 
         private short major;
         private short minor;
@@ -182,7 +202,7 @@ namespace GameLauncher
             string[] versionStrings = _version.Split('.');
             if (versionStrings.Length != 3)
             {
-                major = 0;
+                major = 1;
                 minor = 0;
                 subMinor = 0;
                 return;
